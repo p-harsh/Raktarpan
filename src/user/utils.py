@@ -5,9 +5,10 @@ import bcrypt
 
 # make new hashed password
 def MAKE_PASSWORD(password):
-    password = password.encode()
+    password = password.encode('utf8')
     hash = bcrypt.hashpw(password, bcrypt.gensalt())
-    return hash
+    return hash.decode('utf8')
+    # return hash
 
 
 # match password to hashed one
