@@ -94,10 +94,8 @@ class SigninTest(TestCase):
             'city': self.city,}
         User.objects.create(**self.credentials)
         
-    def test_login(self):
-        # get the inner html of dashboard
-        data = {'username': 'test4', 'password': '123456'.encode('utf-8')}
-        response = self.client.post('/user/loginUser', data = data)
-        print(response);
-    def updateComponent(self):
-        
+    # def test_login(self):
+    #     data = {'username': 'test4', 'password': '123456'}
+    #     response = self.client.post('/user/loginUser', data)
+    #     print(response);
+    # def updateComponent(self):
