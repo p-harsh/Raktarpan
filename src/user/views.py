@@ -44,6 +44,8 @@ from .models import (
     Granulocytes
 )
 
+from operator import itemgetter
+
 # Create your views here.
 
 def login(request):
@@ -84,6 +86,20 @@ def blood_bank_signup(request):
     else:
         url = role_based_redirection(request)
         return HttpResponseRedirect(url)
+    
+def donor_signup(request):
+    user = IsLoggedIn(request);
+    if user is None:
+        return render(
+            request, "donor_signup.html",
+            {
+                "cities": City.objects.all(), 
+                "states": State.objects.all()
+            }
+        )
+    else:
+        url = role_based_redirection(request);
+        return HttpResponseRedirect(url);
 
 def register_blood_bank(request):
     user = IsLoggedIn(request)
@@ -94,7 +110,10 @@ def register_blood_bank(request):
             email = request.POST.get("email")
             password1 = request.POST.get("password")
             password2 = request.POST.get("conf_password")
-            address = request.POST.get("address")
+            role = request.POST.get("roles")
+            address = "N/A"
+            if(role != "donor"):
+                address = request.POST.get("address")
             contact = request.POST.get("contact")
             city = City.objects.get(name=request.POST.get("city"))
             state = State.objects.get(name=request.POST.get("state"))
@@ -112,6 +131,19 @@ def register_blood_bank(request):
                 elif User.objects.filter(email=email).exists():
                     messages.error(request, "User with this email already exits!")
                     return HttpResponseRedirect("/user/signup")
+                elif role=="donor":
+                    user = User(roles="donor")
+                    user.blood_bank_name = name
+                    user.username = username
+                    user.email = email
+                    user.password = password
+                    user.address = "N/A"
+                    user.contact= contact
+                    user.city = city
+                    user.state = state
+                    user.save()
+                    messages.success(request, "User account created successfully!")
+                    return HttpResponseRedirect("/user/loginpage")
                 else:
                     #create a user obj and save
                     user = User(roles="blood_bank")
@@ -201,9 +233,14 @@ def loginUser(request):
         if request.method == "POST":
             username = request.POST.get("username")
             password = request.POST.get("password")
+            user_role = request.POST.get("user_role");
+            print(request.POST.get("user_role"));
             if User.objects.filter(username=username).exists(): # username exists in the dB
                 user = User.objects.get(username=username)
-                if CHECK_PASSWORD(password, user.password): # entered password matches with the password stored in dB
+                if user.roles != user_role:
+                    messages.error(request, "Choose role correctly")
+                    return HttpResponseRedirect("/user/loginpage");
+                elif CHECK_PASSWORD(password, user.password): # entered password matches with the password stored in dB
                     request.session["username"] = username
                     request.session.modified = True
                     # rendering pages based on roles
@@ -252,10 +289,10 @@ def blood_bank_dashboard(request):
     else:
     #logging.basicConfig(level=logging.INFO)
     #logger = logging.getLogger('myapp')
-        data = {"blood_bank": None, "rbc": None, "platelets": None, "platelets":None, "cryo_ahf":None, "granulocytes":None}#,"items": []}
+        data = {"blood_bank": None, "rbc": None, "platelets": None, "plasma":None, "cryo_ahf":None, "granulocytes":None}#,"items": []}
 
         for b in User.objects.all():
-            if b == user:
+            if(b == user and user.roles=='blood_bank'):
                 data["blood_bank"] = b
                 for r in RBC.objects.all():
                     if r.user == b:
@@ -280,6 +317,50 @@ def blood_bank_dashboard(request):
                         break
                 break
         return render(request, "blood_bank_dashboard.html",data)
+    
+    
+def donor_dashboard(request):
+    user = IsLoggedIn(request);
+    if user is None: # not already logged in 
+        messages.error(request, "Kindly login to view the page!")
+        return HttpResponseRedirect("/user/logout")
+    elif user.roles != "donor": # already logged in but not as donor
+        url = role_based_redirection(request)
+        return HttpResponseRedirect(url)
+    else:
+        data = {"all_blood_banks": None}
+        all_blood_banks = []
+        all_donor_blood_banks = []
+        for u in User.objects.all():
+            if u.roles == 'blood_bank':
+                temp = {'blood_bank_name': None, 'contact': None, 'address': None, 'state': None, 'city': None, 'inContact': False, 'user_id': None} 
+                temp['blood_bank_name'] = u.blood_bank_name
+                temp['contact'] = u.contact;
+                temp['address'] = u.address
+                temp['state'] = u.state.name
+                temp['city'] = u.city.name
+                temp['user_id'] = u.user_id
+                all_blood_banks.append(temp);
+
+        for bb in user.donor_blood_bank_contact.all():
+            if bb.roles == 'blood_bank':
+                temp = {'blood_bank_name': None, 'contact': None, 'address': None, 'state': None, 'city': None, 'inContact': False, 'user_id': None}
+                temp['blood_bank_name'] = bb.blood_bank_name;
+                temp['contact'] = bb.contact;
+                temp['address'] = bb.address
+                temp['state'] = bb.state.name
+                temp['city'] = bb.city.name
+                temp['user_id'] = bb.user_id
+                all_donor_blood_banks.append(temp);
+        for dbb in all_donor_blood_banks:
+            for bb in all_blood_banks:
+                if bb['user_id'] == dbb['user_id']:
+                    bb['inContact'] = True;
+                    break;
+        
+        all_blood_banks = sorted(all_blood_banks, key=itemgetter('inContact'), reverse=True); 
+        data["all_blood_banks"] = all_blood_banks;
+        return render(request, "donor_dashboard.html", data);
 
 def getdetails(request):
     state = request.GET.get('state')
@@ -291,6 +372,7 @@ def getdetails(request):
     for city in City.objects.all():
         if city.state == state_object: 
             result_set.append({'id': city.city_id, 'name': city.name})
+    result_set = sorted(result_set, key=itemgetter('name'), reverse=True); 
     return HttpResponse(simplejson.dumps(result_set), content_type="application/json")
 
 def searchBlood(request):
@@ -321,6 +403,8 @@ def searchBlood(request):
             if state_object != -1 and t.state != state_object:
                 continue
             if city_object != -1 and t.city != city_object:
+                continue
+            if t.roles != 'blood_bank':
                 continue
             if (blood_component_ == '' or blood_component_ == "RBC") and RBC.objects.filter(user=t).exists():
                 rbc = RBC.objects.get(user=t)
@@ -546,7 +630,7 @@ def blood_bank_profile(request):
         if user.roles == "blood_bank":
             data = {"blood_bank": None}
             for b in User.objects.all():
-                if b == user:
+                if b == user and b.roles == 'blood_bank':
                     data["blood_bank"] = b
                     break
             return render(request, "blood_bank_profile.html", data)
@@ -705,6 +789,56 @@ def update_blood_details(request):
 
             messages.success(request, "Blood Details Succesfully Updated!")
             return HttpResponseRedirect("/user/blood_bank_dashboard")
+        else:
+            messages.error(request, "Kindly login to view the page!")
+            return HttpResponseRedirect("/user")
+        
+
+def update_donor_blood_bank_contact(request):
+    user = IsLoggedIn(request)
+    if user is None: # not already logged in 
+        messages.error(request, "Kindly login to view the page!")
+        return HttpResponseRedirect("/user/logout")
+    elif user.roles != "donor": # already logged in but not as donor 
+        url = role_based_redirection(request)
+        return HttpResponseRedirect(url)
+    else:
+        if request.method == "POST":
+            user.donor_blood_bank_contact.clear();
+            for key, value in request.POST.items():
+                if key.find("option")!=-1:
+                    user_id = value;
+                    bb = User.objects.get(user_id = user_id);
+                    user.donor_blood_bank_contact.add(bb);
+            
+            messages.success(request, "Blood Details Succesfully Updated!")
+            return HttpResponseRedirect("/user/donor_dashboard")
+        else:
+            messages.error(request, "Kindly login to view the page!")
+            return HttpResponseRedirect("/user")
+        
+def donor_contact(request):
+    user = IsLoggedIn(request)
+    if user is None:
+        return HttpResponseRedirect("/user")
+    else:
+        if user.roles == "blood_bank":
+            data = {"volunteer_donors": None, 'blood_bank':None};
+            volunteer_donors = []
+            for volunteer in User.objects.filter(roles='donor'):
+                if volunteer.donor_blood_bank_contact.filter(user_id = user.user_id).exists():
+                    # print(volunteer_donor.username);
+                    temp = {'blood_bank_name': None, 'contact': None, 'state': None, 'city': None, 'user_id': None} 
+                    temp['blood_bank_name'] = volunteer.blood_bank_name;
+                    temp['contact'] = volunteer.contact;
+                    temp['state'] = volunteer.state;
+                    temp['city'] = volunteer.city;
+                    temp['user_id'] = volunteer.user_id;
+                    volunteer_donors.append(temp);
+            
+            data['volunteer_donors'] = volunteer_donors;
+            data['blood_bank'] = user;
+            return render(request, "donor_contact.html", data)
         else:
             messages.error(request, "Kindly login to view the page!")
             return HttpResponseRedirect("/user")

@@ -20,8 +20,6 @@
                     $('select#state').change(function () {
                         var option_selected = $(this).find("option:selected");
                         var state = option_selected.val();
-                        // console.log(state);
-
                         $.ajax({
                             url: "getdetails",
                             type: "GET",
@@ -95,7 +93,7 @@ background: radial-gradient(circle, rgba(237,237,237,1) 59%, rgba(255,245,245,1)
                     <ul class="nav navbar-nav navbar-right"> 
                             {% comment %} <li><a href="/user/signup"><span class="glyphicon glyphicon-user"></span>Sign Up</a></li>  {% endcomment %}
                             <div class='dropdown navbar-brand' style="margin-left: 25px;">
-                                <a class="dropdown-toggle" data-toggle="dropdown" href="#"><span class="glyphicon glyphicon-pencil"></span>Register
+                                <a class="dropdown-toggle" data-toggle="dropdown" href="#"><span class="glyphicon glyphicon-sign-up"></span>Register
                                     <span class="caret"></span>
                                 </a>
                                 <ul class="dropdown-menu">
@@ -131,8 +129,9 @@ background: radial-gradient(circle, rgba(237,237,237,1) 59%, rgba(255,245,245,1)
 					    <center><h2><strong>SIGN UP</strong></h2></center>
                         {% endif %}
                     {% csrf_token %}
+                    <div class="form-group" style="display: none"><input type="text" name="roles" placeholder="role" class="form-control" required="True" value="donor"></div>
 					<div class="form-group">                     
-                        <input type="text" name="blood_bank_name" placeholder="Blood Bank Name" class="form-control" required="True">
+                        <input type="text" name="blood_bank_name" placeholder="Name" class="form-control" required="True">
 					</div>
                     <div class="form-group">                     
                         <input type="text" name="username" placeholder="User Name" class="form-control" required="True">
@@ -145,9 +144,6 @@ background: radial-gradient(circle, rgba(237,237,237,1) 59%, rgba(255,245,245,1)
 					</div>
                     <div class="form-group">
                         <input type="password" name="conf_password" placeholder="Confirm Password(Min length: 6)" class="form-control" required="True" pattern=".{6,}">
-					</div>
-                    <div class="form-group">                     
-                        <input type="text" name="address" placeholder="Address" class="form-control" required="True">
 					</div>
                     <div class="form-group">                     
                         <input type="text" name="contact" placeholder="Contact" class="form-control" required="True">
@@ -183,6 +179,7 @@ background: radial-gradient(circle, rgba(237,237,237,1) 59%, rgba(255,245,245,1)
                     <div class="push"></div>
 		</div>
 		
+
 		<footer class = "navbar navbar-fixed-bottom">
             <div class="container"> 
                 <center> 

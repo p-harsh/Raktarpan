@@ -7,6 +7,7 @@
     <meta name='viewport' content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     {% load static %}
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon-white.ico' %}">
     <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Oxygen&display=swap" rel="stylesheet">
     <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
@@ -102,26 +103,7 @@ background: radial-gradient(circle, rgba(237,237,237,1) 59%, rgba(255,245,245,1)
 
 <body>
 
-    <div class="navbar navbar-inverse navbar-fixed-top"> 
-        <div class="container navbar-1"> 
-            <div class="navbar-header"> 
-                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar"> 
-                    <span class="icon-bar"></span> 
-                    <span class="icon-bar"></span> 
-                    <span class="icon-bar"></span> 
-                </button>
-                <a class="navbar-brand" href="/user/blood_bank_dashboard" style="margin-right: 25px;">Home</a>
-                <a class="navbar-brand" href="/user/blood_bank_dashboard/blood_bank_profile" style="margin-right: 25px;">Profile</a>
-                <a class="navbar-brand" href="/user/blood_bank_dashboard/blood_camp" style="margin-right: 25px;">Add Blood Camp</a>
-            </div>
-            <div class="collapse navbar-collapse" id="myNavbar"> 
-                <ul class="nav navbar-nav navbar-right"> 
-                    <li><a href=""><span class = "glyphicon glyphicon-user"></span> {{ blood_bank.username }}</a></li> 
-                    <li><a href = "/user/logout"><span class = "glyphicon glyphicon-log-in"></span> Logout</a></li> 
-                </ul> 
-            </div> 
-        </div> 
-    </div>
+    {% include 'navbar_a_login.html' with blood_bank=blood_bank%}
 
     <div class="container container-fluid">
         <div class="row">
@@ -196,14 +178,15 @@ background: radial-gradient(circle, rgba(237,237,237,1) 59%, rgba(255,245,245,1)
                         </div>
                 </form>
 
-            <footer class="navbar-fixed-bottom">
-                    <div class="container">
-                        <center>
-                            <p>
-                                Copyright &copy; RaktArpan All Rights Reserved</p>
-                        </center>
-                    </div>
-            </footer>
+            {% comment %} <footer class = "navbar navbar-fixed-bottom"> {% endcomment %}
+            <div class="container"> 
+                <center> 
+                    <p>
+                        Copyright &copy; RaktArpan All Rights Reserved
+                    </p> 
+                </center> 
+            </div> 
+        {% comment %} </footer> {% endcomment %}
 </body>
 
 </html>

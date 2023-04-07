@@ -27,9 +27,10 @@ class User(models.Model):
     password = models.CharField(max_length=100, blank=False)
     contact = models.CharField(max_length=10, default="N/A", blank=False)
     address = models.CharField(max_length=400, default="N/A", blank=False)
-    roles = models.CharField(max_length=20, default="N/A", blank=False) #blood_bank : for role based restriction
+    roles = models.CharField(max_length=20, default="N/A", blank=False) #blood_bank, donor : for role based restriction
     state = models.ForeignKey(State, on_delete=models.CASCADE,null=True,  default = None)
     city = models.ForeignKey(City, on_delete=models.CASCADE, null=True, default = None)
+    donor_blood_bank_contact = models.ManyToManyField('self', blank=True, null=True, symmetrical=False)
     
     def __str__(self):
         return str(self.user_id)

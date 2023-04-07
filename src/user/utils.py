@@ -41,7 +41,8 @@ def role_based_redirection(request):
     role = get_role(request)
     if role == "blood_bank":
         return "/user/blood_bank_dashboard"
-    
+    elif role == "donor":
+        return "/user/donor_dashboard"
     else:
         messages.error(request, "Role not valid!")
         return "/user/logout"
