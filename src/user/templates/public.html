@@ -91,6 +91,33 @@
                 margin-right: 0px;
                 margin-left: 0px;
             }
+            .footer{
+                padding: 8px;
+                display: grid; 
+                width: 100%; 
+                grid-template-columns:1fr 1fr 1fr 1fr; 
+                color: white;
+            }
+            .footer .col{
+                padding: 12px;
+            }
+            .footer a{
+                color: #ffcebf;
+                margin-top: 8px;
+                margin-bottom: 8px;
+            }
+            .footer a:hover{
+                text-decoration: underline;
+            }
+            .footer a:visited{
+                color: #85caf2;
+            }
+            @media only screen and (max-width: 767.98px) {
+                .footer{
+                    display: grid;
+                    grid=template-columns: 1fr 1fr 1fr;
+                }
+            }
         </style>
 	</head>
 	<body>
@@ -372,6 +399,36 @@
             <br><br>
             <button type="button" onclick="window.location='/user/donateBlood'" style="border-radius:0px" class="btn-lg btn btn-danger svcNearBy hvr-sweep-to-right ">Find Nearest Blood Bank To Donate</button> 
             <br><br>
+        </div>
+        <div class='footer' style='background-color: #050d30;'>
+            <div class='col'>
+                <h5>RAKTARPAN</h5>
+                <p>This app is made for patients to search for blood banks, for donors to search for blood camps and volunteer donors that can be contacted by the blood bank.</p>
+            </div>
+            <div class='col'>
+                <h5>Looking for Blood</h5>
+                <a href='/user/searchBlood'>Search Blood</a>
+            </div>
+            <div class='col'>
+                <h5>Donate Blood</h5>
+                    <a href='/user/searchBlood'>Find Blood Camp</a>
+                    <br/>
+                    <a href='/user/searchBlood'>Volunteer Donor</a>
+                </div>
+                <div class='col'>
+                    <h5>Other Links</h5>
+                    <h6 style='margin-bottom: 2px;'>REGISTER</h6>
+                    <div style='margin-left: 8px;'>
+                        <a href='/user/donorsignup'>Blood Bank</a>
+                        <br/>
+                        <a href='/user/signup'>Volunteer Donor</a>
+                        <br/>
+                    </div>
+                    <a href='/user/loginpage'>Login</a>
+            </div>
+            <h6 style='text-align: center; grid-column: 1/5;'>
+                Copyright © RaktArpan All Rights Reserved
+            </h6>
         </div>
 	</body>
 </html>
