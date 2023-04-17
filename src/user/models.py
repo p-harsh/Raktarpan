@@ -124,3 +124,13 @@ class Granulocytes(models.Model):
 
     def __str__(self):
         return str(self.granulocytes_id)
+
+class DonationCertificate(models.Model):
+    donation_certificate_id = models.AutoField(primary_key=True)
+    camp_name = models.CharField(max_length=30, blank=False)
+    donor = models.ForeignKey(User, on_delete=models.CASCADE)
+    date = models.CharField(max_length=30, blank=False)
+    signature = models.CharField(max_length=30, blank=False)
+    
+    def __str__(self):
+        return str(self.donation_certificate_id)

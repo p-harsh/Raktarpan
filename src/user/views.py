@@ -18,7 +18,8 @@ from .models import (
     Platelets,
     Plasma,
     CryoAHF,
-    Granulocytes
+    Granulocytes,
+    DonationCertificate
 )
 
 from django.contrib import messages
@@ -328,7 +329,7 @@ def donor_dashboard(request):
         url = role_based_redirection(request)
         return HttpResponseRedirect(url)
     else:
-        data = {"all_blood_banks": None}
+        data = {"all_blood_banks": None, "donation_certificate": None, "user": user}
         all_blood_banks = []
         all_donor_blood_banks = []
         for u in User.objects.all():
@@ -360,6 +361,10 @@ def donor_dashboard(request):
         
         all_blood_banks = sorted(all_blood_banks, key=itemgetter('inContact'), reverse=True); 
         data["all_blood_banks"] = all_blood_banks;
+        
+        data['donation_certificate'] = DonationCertificate.objects.filter(donor=user);
+        
+        data["user"] = user
         return render(request, "donor_dashboard.html", data);
 
 def getdetails(request):
@@ -376,8 +381,6 @@ def getdetails(request):
     return HttpResponse(simplejson.dumps(result_set), content_type="application/json")
 
 def searchBlood(request):
-    # logging.basicConfig(level=logging.INFO)
-    # logger = logging.getLogger('myapp')
     data = {"items": [], 
             "blood_groups": ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'], 
             "blood_components": ['RBC', 'Plasma', "Platelets", "Cryo AHF", "Granulocytes"],
@@ -811,7 +814,7 @@ def update_donor_blood_bank_contact(request):
                     bb = User.objects.get(user_id = user_id);
                     user.donor_blood_bank_contact.add(bb);
             
-            messages.success(request, "Blood Details Succesfully Updated!")
+            messages.success(request, "Donor Details Succesfully Updated!")
             return HttpResponseRedirect("/user/donor_dashboard")
         else:
             messages.error(request, "Kindly login to view the page!")
@@ -842,3 +845,45 @@ def donor_contact(request):
         else:
             messages.error(request, "Kindly login to view the page!")
             return HttpResponseRedirect("/user")
+        
+        
+def blood_bank_directory(request):
+    if request.method == "GET":
+        data = {"blood_banks": []}
+        blood_banks = User.objects.filter(roles='blood_bank');
+        data["blood_banks"] = blood_banks;
+        return render(request, "blood_bank_directory.html", data)
+    
+def add_blood_donate_certificate(request):
+    user = IsLoggedIn(request)
+    if user is None:
+        return HttpResponseRedirect("/user")
+    else:
+        if user.roles == "blood_bank":
+            data = {"volunteer_donors": None, 'user':None};
+            data["volunteer_donors"] = User.objects.filter(roles='donor');
+            data["user"] = user
+            return render(request, "add_blood_donate_certificate.html", data)
+        else:
+            messages.error(request, "Kindly login to view the page!")
+            return HttpResponseRedirect("/user")
+    
+def add_certificate(request):
+    user = IsLoggedIn(request)
+    if user is None: # not already logged in 
+        messages.error(request, "Kindly login to view the page!")
+        return HttpResponseRedirect("/user/logout")
+    elif user.roles != "blood_bank": # already logged in but not as blood_bank 
+        url = role_based_redirection(request)
+        return HttpResponseRedirect(url)
+    elif request.method == "POST":
+        cert = DonationCertificate()
+        cert.camp_name = request.POST.get('camp_name');
+        cert.date = request.POST.get('cert_date');
+        cert.donor = User.objects.get(username=request.POST.get("donor_username"));
+        cert.signature = request.POST.get('signature');
+        cert.save();
+        messages.success(request, "Certificate Added Successfully!");
+        return HttpResponseRedirect("/user/blood_bank_dashboard/add_blood_donate_certificate")
+    else:
+        return HttpResponseRedirect("/user")

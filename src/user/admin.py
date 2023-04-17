@@ -10,7 +10,8 @@ from user.models import (
     Platelets,
     Plasma,
     CryoAHF,
-    Granulocytes
+    Granulocytes,
+    DonationCertificate,
 )
 
 admin.site.register(City)
@@ -22,3 +23,4 @@ admin.site.register(Platelets)
 admin.site.register(Plasma)
 admin.site.register(CryoAHF)
 admin.site.register(Granulocytes)
+admin.site.register(DonationCertificate)

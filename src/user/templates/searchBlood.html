@@ -189,7 +189,15 @@ background: radial-gradient(circle, rgba(237,237,237,1) 59%, rgba(255,245,245,1)
                 <div class="collapse navbar-collapse" id="myNavbar"> 
                     <ul class="nav navbar-nav navbar-right"> 
                         <a class="navbar-brand" href="/user/donateBlood" style="margin-right: 25px;">Donate Blood</a>
-                        <a class="navbar-brand" href="/user/searchBlood" style="margin-right: 25px;">Look for Blood</a>
+                        <div class='dropdown navbar-brand' style="margin-left: 25px;">
+                            <a class="dropdown-toggle" data-toggle="dropdown" href="#"><span class="glyphicon glyphicon-sign-up"></span>Look for Blood
+                                <span class="caret"></span>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a href="/user/searchBlood">Search Blood</a></li>
+                                <li><a href="/user/blood_bank_directory">Blood Bank Directory</a></li>
+                            </ul>
+                        </div>
                     </ul> 
                 </div> 
             </div> 
